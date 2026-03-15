@@ -232,11 +232,11 @@
         <div class="demo-row">
             <div>
                 <span class="badge">Admin</span>
-                <code>admin@logiatech.com</code>
+                <code>admin@demo.com</code>
             </div>
             <div>
                 <span class="badge">Password</span>
-                <code>password</code>
+                <code>20252025</code>
             </div>
         </div>
     </div>
