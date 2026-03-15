@@ -14,8 +14,8 @@ tech:
     - JavaScript
     - jQuery
     - 'HTML & CSS'
-live_url: 'https://your-live-url.com'
-github_url: 'https://github.com/jmunyira1/project_invoice'
+live_url: 'https://invoice.munyira.co.ke/'
+github_url: 'https://github.com/jmunyira1/Project_Invoice'
 featured: false
 active: true
 ---
