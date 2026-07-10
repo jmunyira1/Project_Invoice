@@ -5,7 +5,9 @@ use App\Http\Controllers\CostController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliverableController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProjectFileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingController;
@@ -52,6 +54,22 @@ Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
         ->name('projects.costs.update');
     Route::delete('projects/{project}/costs/{cost}', [CostController::class, 'destroy'])
         ->name('projects.costs.destroy');
+
+// Installments — nested under projects
+    Route::post('projects/{project}/installments', [InstallmentController::class, 'store'])
+        ->name('projects.installments.store');
+    Route::patch('projects/{project}/installments/{installment}', [InstallmentController::class, 'update'])
+        ->name('projects.installments.update');
+    Route::delete('projects/{project}/installments/{installment}', [InstallmentController::class, 'destroy'])
+        ->name('projects.installments.destroy');
+
+// Project files — nested under projects
+    Route::post('projects/{project}/files', [ProjectFileController::class, 'store'])
+        ->name('projects.files.store');
+    Route::get('projects/{project}/files/{file}/download', [ProjectFileController::class, 'download'])
+        ->name('projects.files.download');
+    Route::delete('projects/{project}/files/{file}', [ProjectFileController::class, 'destroy'])
+        ->name('projects.files.destroy');
 
     // Documents
     Route::resource('documents', DocumentController::class)->except(['edit', 'update']);

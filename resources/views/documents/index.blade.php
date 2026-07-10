@@ -7,9 +7,10 @@
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between pb-0">
             <h5>All Documents</h5>
-            <a href="{{ route('documents.create') }}" class="btn btn-primary btn-sm">
-                <i data-feather="plus" style="width:14px;height:14px" class="me-1"></i>
-                New Document
+            <a href="{{ route('documents.create') }}"
+               hx-get="{{ route('documents.create') }}" hx-target="#app-modal-content"
+               class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>New Document
             </a>
         </div>
 
@@ -19,7 +20,9 @@
                     <i data-feather="file-text" style="width:40px;height:40px;opacity:.3"
                        class="d-block mx-auto mb-3"></i>
                     <p class="mb-2">No documents yet.</p>
-                    <a href="{{ route('documents.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('documents.create') }}"
+                       hx-get="{{ route('documents.create') }}" hx-target="#app-modal-content"
+                       class="btn btn-primary btn-sm">
                         Create your first document
                     </a>
                 </div>

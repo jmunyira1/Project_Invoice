@@ -2,64 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesProjectCards;
 use App\Models\Deliverable;
 use App\Models\Project;
+use Illuminate\Http\Request;
 
 class DeliverableController extends Controller
 {
-    public function store(Project $project)
+    use HandlesProjectCards;
+
+    public function store(Request $request, Project $project)
     {
-        $this->authorise($project);
+        $this->authoriseProject($project);
 
-        $data = request()->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'quantity' => ['required', 'numeric', 'min:0.01'],
-            'unit_price' => ['required', 'numeric', 'min:0'],
-        ]);
-
+        $data = $this->validateData($request);
         $data['project_id'] = $project->id;
         Deliverable::create($data);
 
-        return back()->with('success', 'Deliverable added.');
+        return $this->projectBodyResponse($request, $project, 'Deliverable added.');
     }
 
-    private function authorise(Project $project): void
+    public function update(Request $request, Project $project, Deliverable $deliverable)
     {
-        if ($project->organisation_id !== $this->org()->id) {
-            abort(403);
-        }
-    }
-
-    private function org()
-    {
-        return auth()->user()->organisation;
-    }
-
-    public function update(Project $project, Deliverable $deliverable)
-    {
-        $this->authorise($project);
+        $this->authoriseProject($project);
         abort_if($deliverable->project_id !== $project->id, 403);
 
-        $data = request()->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'quantity' => ['required', 'numeric', 'min:0.01'],
-            'unit_price' => ['required', 'numeric', 'min:0'],
-        ]);
+        $deliverable->update($this->validateData($request));
 
-        $deliverable->update($data);
-
-        return back()->with('success', 'Deliverable updated.');
+        return $this->projectBodyResponse($request, $project, 'Deliverable updated.');
     }
 
-    public function destroy(Project $project, Deliverable $deliverable)
+    public function destroy(Request $request, Project $project, Deliverable $deliverable)
     {
-        $this->authorise($project);
+        $this->authoriseProject($project);
         abort_if($deliverable->project_id !== $project->id, 403);
 
         $deliverable->delete();
 
-        return back()->with('success', 'Deliverable removed.');
+        return $this->projectBodyResponse($request, $project, 'Deliverable removed.');
+    }
+
+    private function validateData(Request $request): array
+    {
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'quantity' => ['required', 'numeric', 'min:0.01'],
+            'unit_price' => ['required', 'numeric', 'min:0'],
+        ]);
     }
 }

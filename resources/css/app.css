@@ -1,3 +1,141 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ── Vendor: Bootstrap Icons, OverlayScrollbars, AdminLTE 4 (bundles Bootstrap 5.3) ── */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'overlayscrollbars/styles/overlayscrollbars.css';
+@import 'admin-lte/dist/css/adminlte.css';
+
+/* ──────────────────────────────────────────────────────────────────────────
+   App-level overrides & helpers
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+    --app-brand: #4f46e5;          /* indigo */
+    --app-brand-rgb: 79, 70, 229;
+}
+
+body {
+    font-family: 'Inter', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Brand accent on primary buttons/links kept subtle over AdminLTE defaults */
+.text-brand { color: var(--app-brand) !important; }
+.bg-brand { background-color: var(--app-brand) !important; }
+
+/* Card polish */
+.card {
+    border: 1px solid var(--bs-border-color-translucent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+.card > .card-header {
+    background-color: transparent;
+    font-weight: 600;
+}
+
+/* Compact tables used across list views */
+.table-clean > :not(caption) > * > * {
+    padding: .6rem .75rem;
+}
+.table-clean thead th {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--bs-secondary-color);
+    border-bottom-width: 1px;
+}
+
+/* Soft badges (badge-soft-*) — light background, coloured text */
+.badge-soft-primary   { background: rgba(var(--bs-primary-rgb), .12);   color: var(--bs-primary); }
+.badge-soft-secondary { background: rgba(var(--bs-secondary-rgb), .14); color: var(--bs-secondary-color); }
+.badge-soft-success   { background: rgba(var(--bs-success-rgb), .14);   color: var(--bs-success); }
+.badge-soft-danger    { background: rgba(var(--bs-danger-rgb), .12);    color: var(--bs-danger); }
+.badge-soft-warning   { background: rgba(var(--bs-warning-rgb), .18);   color: #9a6a00; }
+.badge-soft-info      { background: rgba(var(--bs-info-rgb), .14);      color: var(--bs-info); }
+
+/* Stat tiles on dashboards */
+.stat-tile .stat-icon {
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: .6rem; font-size: 1.15rem;
+}
+
+/* ── HTMX niceties ─────────────────────────────────────────────────────── */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity .2s ease-in;
+}
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+.htmx-request.hx-busy,
+.htmx-request .hx-busy {
+    pointer-events: none;
+    opacity: .6;
+}
+
+/* Global top progress bar driven by htmx events (see app.js) */
+#htmx-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--bs-primary);
+    z-index: 2000;
+    transition: width .2s ease, opacity .3s ease;
+    opacity: 0;
+}
+#htmx-progress.active { opacity: 1; }
+
+/* Fade-in for swapped fragments */
+.htmx-added { animation: htmx-fade-in .25s ease; }
+@keyframes htmx-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Avatar circle used in navbar / lists */
+.avatar-circle {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Compatibility shim for leftover "Cuba" theme utility classes so views that
+   have not been hand-converted still render correctly under AdminLTE/Bootstrap.
+   ────────────────────────────────────────────────────────────────────────── */
+.f-11 { font-size: .6875rem !important; }
+.f-12 { font-size: .75rem !important; }
+.f-13 { font-size: .8125rem !important; }
+.f-14 { font-size: .875rem !important; }
+.f-16 { font-size: 1rem !important; }
+.f-18 { font-size: 1.125rem !important; }
+.f-20 { font-size: 1.25rem !important; }
+.f-w-500 { font-weight: 500 !important; }
+.f-w-600 { font-weight: 600 !important; }
+
+.b-r-4  { border-radius: .25rem !important; }
+.b-r-6  { border-radius: .375rem !important; }
+.b-r-8  { border-radius: .5rem !important; }
+.b-r-10 { border-radius: .625rem !important; }
+
+/* Cuba "badge-light-*" soft badges → map onto our soft badge palette */
+.badge-light-primary   { background: rgba(var(--bs-primary-rgb), .12);   color: var(--bs-primary); }
+.badge-light-secondary { background: rgba(var(--bs-secondary-rgb), .14); color: var(--bs-secondary-color); }
+.badge-light-success   { background: rgba(var(--bs-success-rgb), .14);   color: var(--bs-success); }
+.badge-light-danger    { background: rgba(var(--bs-danger-rgb), .12);    color: var(--bs-danger); }
+.badge-light-warning   { background: rgba(var(--bs-warning-rgb), .18);   color: #9a6a00; }
+.badge-light-info      { background: rgba(var(--bs-info-rgb), .14);      color: var(--bs-info); }
+
+/* Cuba soft background tints */
+.bg-light-primary   { background: rgba(var(--bs-primary-rgb), .12) !important; }
+.bg-light-secondary { background: rgba(var(--bs-secondary-rgb), .14) !important; }
+.bg-light-success   { background: rgba(var(--bs-success-rgb), .14) !important; }
+.bg-light-danger    { background: rgba(var(--bs-danger-rgb), .12) !important; }
+.bg-light-warning   { background: rgba(var(--bs-warning-rgb), .18) !important; }
+.bg-light-info      { background: rgba(var(--bs-info-rgb), .14) !important; }
+
+.txt-primary { color: var(--bs-primary) !important; }
+.txt-success { color: var(--bs-success) !important; }
+.txt-danger  { color: var(--bs-danger) !important; }
+.txt-warning { color: var(--bs-warning) !important; }
+.txt-secondary { color: var(--bs-secondary-color) !important; }

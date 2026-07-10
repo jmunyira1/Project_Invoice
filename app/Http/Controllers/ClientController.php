@@ -26,7 +26,12 @@ class ClientController extends Controller
 
     public function store(StoreClientRequest $request)
     {
-        $this->org()->clients()->create($request->validated());
+        $client = $this->org()->clients()->create($request->validated());
+
+        if ($request->header('HX-Request')) {
+            return response()->noContent()
+                ->header('HX-Redirect', route('clients.show', $client));
+        }
 
         return redirect()
             ->route('clients.index')
@@ -35,6 +40,10 @@ class ClientController extends Controller
 
     public function create()
     {
+        if (request()->header('HX-Request')) {
+            return view('clients.partials.form_modal', ['client' => null]);
+        }
+
         return view('clients.create');
     }
 
@@ -65,6 +74,10 @@ class ClientController extends Controller
     {
         $this->authorise($client);
 
+        if (request()->header('HX-Request')) {
+            return view('clients.partials.form_modal', compact('client'));
+        }
+
         return view('clients.edit', compact('client'));
     }
 
@@ -73,6 +86,11 @@ class ClientController extends Controller
         $this->authorise($client);
 
         $client->update($request->validated());
+
+        if ($request->header('HX-Request')) {
+            return response()->noContent()
+                ->header('HX-Redirect', route('clients.show', $client));
+        }
 
         return redirect()
             ->route('clients.show', $client)

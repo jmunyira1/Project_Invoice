@@ -40,6 +40,11 @@ class DocumentController extends Controller
         // Snapshot deliverables as document lines
         $this->snapshotDeliverables($document, $project);
 
+        if ($request->header('HX-Request')) {
+            return response()->noContent()
+                ->header('HX-Redirect', route('documents.show', $document));
+        }
+
         return redirect()
             ->route('documents.show', $document)
             ->with('success', "{$document->type_label} {$document->number} created.");
@@ -53,6 +58,12 @@ class DocumentController extends Controller
 
         // Pre-select org default template
         $defaultTemplateId = $this->org()->default_template_id;
+
+        if (request()->header('HX-Request')) {
+            return view('documents.partials.form_modal', compact(
+                'projects', 'templates', 'selectedProjectId', 'defaultTemplateId'
+            ));
+        }
 
         return view('documents.create', compact(
             'projects', 'templates', 'selectedProjectId', 'defaultTemplateId'

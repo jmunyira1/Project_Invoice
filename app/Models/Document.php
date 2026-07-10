@@ -16,6 +16,7 @@ class Document extends Model
     protected $fillable = [
         'organisation_id',
         'project_id',
+        'payment_id',
         'template_id',
         'type',
         'number',
@@ -51,6 +52,14 @@ class Document extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * For receipt documents: the payment this receipt evidences.
+     */
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     public function getTotalAttribute(): float

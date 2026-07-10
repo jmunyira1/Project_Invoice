@@ -24,7 +24,7 @@ class OrganisationSeeder extends Seeder
                 'phone' => '+254 711 318 428',
                 'address' => 'Nairobi, Kenya',
                 'currency' => 'KES',
-                'default_template_id' => Template::where('slug', 'classic')->value('id'),
+                'default_template_id' => Template::where('slug', 'template-001')->value('id'),
             ]
         );
 
@@ -50,13 +50,12 @@ class OrganisationSeeder extends Seeder
                 'phone' => '+254 711 318 428',
                 'address' => 'Nairobi, Kenya',
                 'currency' => 'KES',
-                'default_template_id' => Template::where('slug', 'classic')->value('id'),
+                'default_template_id' => Template::where('slug', 'template-001')->value('id'),
             ]
         );
 
         // ── Super admin user ───────────────────────────────────────
         User::updateOrCreate(
-            ['email' => 'admin@munyira.co.ke'],
             [
                 'name' => 'Munyira Joseph',
                 'email' => 'munyira@munyira.co.ke',

@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\RendersModalOnFailure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreClientRequest extends FormRequest
 {
+    use RendersModalOnFailure;
+
     public function authorize(): bool
     {
         return true;
@@ -19,5 +22,15 @@ class StoreClientRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:1000'],
         ];
+    }
+
+    protected function modalView(): string
+    {
+        return 'clients.partials.form_modal';
+    }
+
+    protected function modalData(): array
+    {
+        return ['client' => null];
     }
 }

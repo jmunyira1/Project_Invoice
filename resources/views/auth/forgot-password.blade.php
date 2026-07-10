@@ -1,41 +1,25 @@
 <x-guest-layout>
+    <div class="text-center mb-3">
+        <h4 class="fw-semibold mb-1">Forgot password?</h4>
+        <p class="text-muted small mb-0">Enter your email and we'll send you a reset link.</p>
+    </div>
+
+    <x-auth-session-status :status="session('status')" />
 
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
 
-        <h4>Forgot password?</h4>
-        <p class="f-light">Enter your email and we'll send you a reset link.</p>
-
-        @if(session('status'))
-            <div class="alert alert-success" role="alert">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        <div class="form-group">
-            <label class="col-form-label">Email address</label>
-            <input class="form-control @error('email') is-invalid @enderror"
-                   type="email"
-                   name="email"
-                   value="{{ old('email') }}"
-                   placeholder="you@example.com"
-                   required
-                   autofocus>
-            @error('email')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="mb-3">
+            <x-input-label for="email" :value="__('Email address')" />
+            <x-text-input id="email" type="email" name="email" :value="old('email')"
+                          placeholder="you@example.com" required autofocus />
+            <x-input-error :messages="$errors->get('email')" />
         </div>
 
-        <div class="form-group mt-3 mb-0">
-            <button class="btn btn-primary w-100" type="submit">
-                Send reset link
-            </button>
-        </div>
+        <button type="submit" class="btn btn-primary w-100">Send reset link</button>
 
-        <div class="mt-3 text-center">
-            <a href="{{ route('login') }}" class="link">Back to sign in</a>
-        </div>
-
+        <p class="text-center small mt-3 mb-0">
+            <a href="{{ route('login') }}" class="text-decoration-none">Back to sign in</a>
+        </p>
     </form>
-
 </x-guest-layout>

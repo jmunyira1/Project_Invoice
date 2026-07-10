@@ -21,9 +21,10 @@
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between pb-0">
             <h5>All Projects</h5>
-            <a href="{{ route('projects.create') }}" class="btn btn-primary btn-sm">
-                <i data-feather="plus" style="width:14px;height:14px" class="me-1"></i>
-                New Project
+            <a href="{{ route('projects.create') }}"
+               hx-get="{{ route('projects.create') }}" hx-target="#app-modal-content"
+               class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>New Project
             </a>
         </div>
         <div class="card-body p-0">
@@ -32,7 +33,9 @@
                     <i data-feather="briefcase" style="width:40px;height:40px;opacity:.3"
                        class="d-block mx-auto mb-3"></i>
                     <p class="mb-2">No projects yet.</p>
-                    <a href="{{ route('projects.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('projects.create') }}"
+                       hx-get="{{ route('projects.create') }}" hx-target="#app-modal-content"
+                       class="btn btn-primary btn-sm">
                         Create your first project
                     </a>
                 </div>
@@ -81,8 +84,9 @@
                                         <i data-feather="eye" style="width:13px;height:13px"></i>
                                     </a>
                                     <a href="{{ route('projects.edit', $project) }}"
+                                       hx-get="{{ route('projects.edit', $project) }}" hx-target="#app-modal-content"
                                        class="btn btn-light btn-sm me-1" title="Edit">
-                                        <i data-feather="edit-2" style="width:13px;height:13px"></i>
+                                        <i class="bi bi-pencil"></i>
                                     </a>
                                     <form method="POST"
                                           action="{{ route('projects.destroy', $project) }}"

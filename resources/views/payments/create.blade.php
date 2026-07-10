@@ -58,6 +58,41 @@
                                        value="{{ old('document_id', request('document_id')) }}">
                             @endif
 
+                            {{-- Payment type (kind) --}}
+                            <div class="col-md-6">
+                                <label class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                <select name="kind" class="form-select @error('kind') is-invalid @enderror" required>
+                                    @foreach([
+                                        'deposit'      => 'Deposit',
+                                        'part_payment' => 'Part Payment',
+                                        'installment'  => 'Installment',
+                                        'balance'      => 'Balance',
+                                        'refund'       => 'Refund',
+                                    ] as $val => $label)
+                                        <option value="{{ $val }}" {{ old('kind', 'part_payment') === $val ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('kind')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            {{-- Settle installment (optional) --}}
+                            @if($installments->isNotEmpty())
+                                <div class="col-md-6">
+                                    <label class="form-label">Settle Installment (optional)</label>
+                                    <select name="installment_id" class="form-select @error('installment_id') is-invalid @enderror">
+                                        <option value="">— None —</option>
+                                        @foreach($installments as $inst)
+                                            <option value="{{ $inst->id }}" {{ old('installment_id') == $inst->id ? 'selected' : '' }}>
+                                                {{ $inst->label }} ({{ $currency }} {{ number_format($inst->balance, 2) }} left)
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('installment_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            @endif
+
                             {{-- Amount --}}
                             <div class="col-md-6">
                                 <label class="form-label">
@@ -142,6 +177,14 @@
                                 @enderror
                             </div>
 
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" name="generate_receipt" value="1"
+                                   id="genReceipt" {{ old('generate_receipt') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="genReceipt">
+                                Generate a receipt document for this payment
+                            </label>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">

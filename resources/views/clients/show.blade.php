@@ -24,9 +24,9 @@
 
                     <div class="d-flex gap-2 justify-content-center mb-4">
                         <a href="{{ route('clients.edit', $client) }}"
+                           hx-get="{{ route('clients.edit', $client) }}" hx-target="#app-modal-content"
                            class="btn btn-primary btn-sm">
-                            <i data-feather="edit-2" style="width:13px;height:13px" class="me-1"></i>
-                            Edit
+                            <i class="bi bi-pencil me-1"></i>Edit
                         </a>
                         <form method="POST"
                               action="{{ route('clients.destroy', $client) }}"

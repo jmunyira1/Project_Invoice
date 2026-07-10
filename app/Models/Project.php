@@ -18,6 +18,7 @@ class Project extends Model
         'client_id',
         'title',
         'description',
+        'value',
         'status',
         'due_date',
     ];
@@ -54,13 +55,35 @@ class Project extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function installments(): HasMany
+    {
+        return $this->hasMany(Installment::class)->orderBy('sort_order');
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(ProjectFile::class)->latest();
+    }
+
     /**
-     * Total value of all deliverables (what we charge the client).
+     * Sum of all deliverable line items.
      */
-    public function getTotalValueAttribute(): float
+    public function getDeliverablesTotalAttribute(): float
     {
         return $this->deliverables
             ->sum(fn($d) => $d->quantity * $d->unit_price);
+    }
+
+    /**
+     * Headline value of the project (what we charge the client).
+     * Uses the agreed value set up-front when present, otherwise falls
+     * back to the sum of deliverables.
+     */
+    public function getTotalValueAttribute(): float
+    {
+        return $this->value !== null
+            ? (float) $this->value
+            : $this->deliverables_total;
     }
 
     // ── Computed values ────────────────────────────────────────────
@@ -98,6 +121,33 @@ class Project extends Model
     }
 
     /**
+     * Total received as deposits.
+     */
+    public function getDepositPaidAttribute(): float
+    {
+        return (float) $this->payments->where('kind', 'deposit')->sum('amount');
+    }
+
+    /**
+     * Percentage of the project value collected so far (0–100).
+     */
+    public function getPaidPercentAttribute(): float
+    {
+        if ($this->total_value <= 0) {
+            return 0.0;
+        }
+        return min(100, round(($this->total_paid / $this->total_value) * 100, 1));
+    }
+
+    /**
+     * Total value scheduled across the installment plan.
+     */
+    public function getScheduledTotalAttribute(): float
+    {
+        return (float) $this->installments->sum('amount');
+    }
+
+    /**
      * Human-readable status badge colour for Cuba.
      */
     public function getStatusBadgeAttribute(): string
@@ -130,6 +180,7 @@ class Project extends Model
     {
         return [
             'due_date' => 'date',
+            'value' => 'float',
         ];
     }
 }

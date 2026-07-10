@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesProjectCards;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
+use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
+    use HandlesProjectCards;
+
     public function index()
     {
         $projects = $this->org()
@@ -42,6 +46,11 @@ class ProjectController extends Controller
 
         $project = Project::create($data);
 
+        if ($request->header('HX-Request')) {
+            return response()->noContent()
+                ->header('HX-Redirect', route('projects.show', $project));
+        }
+
         return redirect()
             ->route('projects.show', $project)
             ->with('success', 'Project created.');
@@ -60,6 +69,14 @@ class ProjectController extends Controller
         $clients = $this->org()->clients()->orderBy('name')->get();
         $selectedClientId = request('client_id');
 
+        if (request()->header('HX-Request')) {
+            return view('projects.partials.form_modal', [
+                'project' => null,
+                'clients' => $clients,
+                'selectedClientId' => $selectedClientId,
+            ]);
+        }
+
         return view('projects.create', compact('clients', 'selectedClientId'));
     }
 
@@ -73,6 +90,8 @@ class ProjectController extends Controller
             'costs' => fn($q) => $q->orderBy('incurred_on', 'desc'),
             'documents' => fn($q) => $q->latest(),
             'payments' => fn($q) => $q->latest(),
+            'installments',
+            'files',
         ]);
 
         $currency = $this->org()->currency;
@@ -92,6 +111,14 @@ class ProjectController extends Controller
         $this->authorise($project);
 
         $clients = $this->org()->clients()->orderBy('name')->get();
+
+        if (request()->header('HX-Request')) {
+            return view('projects.partials.form_modal', [
+                'project' => $project,
+                'clients' => $clients,
+                'selectedClientId' => null,
+            ]);
+        }
 
         return view('projects.edit', compact('project', 'clients'));
     }
@@ -113,21 +140,26 @@ class ProjectController extends Controller
      * PATCH /projects/{project}/status
      * Moves project through the workflow.
      */
-    public function updateStatus(Project $project)
+    public function updateStatus(Request $request, Project $project)
     {
         $this->authorise($project);
 
-        $newStatus = request()->validate([
+        $newStatus = $request->validate([
             'status' => ['required', 'string'],
         ])['status'];
 
         if (!in_array($newStatus, $project->allowed_transitions)) {
-            return back()->with('error', "Cannot move project from [$project->status] to [$newStatus].");
+            return $this->projectBodyResponse(
+                $request,
+                $project,
+                "Cannot move project from [$project->status] to [$newStatus].",
+                'error'
+            );
         }
 
         $project->update(['status' => $newStatus]);
 
-        return back()->with('success', 'Project status updated.');
+        return $this->projectBodyResponse($request, $project, 'Project status updated.');
     }
 
     public function update(UpdateProjectRequest $request, Project $project)
@@ -136,6 +168,11 @@ class ProjectController extends Controller
         $this->authoriseClient($request->client_id);
 
         $project->update($request->validated());
+
+        if ($request->header('HX-Request')) {
+            return response()->noContent()
+                ->header('HX-Redirect', route('projects.show', $project));
+        }
 
         return redirect()
             ->route('projects.show', $project)

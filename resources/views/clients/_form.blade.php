@@ -1,5 +1,6 @@
-{{-- Shared by create.blade.php and edit.blade.php --}}
-{{-- $client is available on edit, undefined on create --}}
+{{-- Shared by create/edit pages and the create/edit modal --}}
+{{-- $client is the model on edit; null/undefined on create --}}
+@php $client ??= null; @endphp
 
 <div class="row g-3">
 
@@ -12,7 +13,7 @@
                id="name"
                name="name"
                class="form-control @error('name') is-invalid @enderror"
-               value="{{ old('name', $client->name ?? '') }}"
+               value="{{ old('name', $client?->name ?? '') }}"
                placeholder="e.g. Acme Corporation"
                required
                autofocus>
@@ -28,7 +29,7 @@
                id="email"
                name="email"
                class="form-control @error('email') is-invalid @enderror"
-               value="{{ old('email', $client->email ?? '') }}"
+               value="{{ old('email', $client?->email ?? '') }}"
                placeholder="client@example.com">
         @error('email')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -42,7 +43,7 @@
                id="phone"
                name="phone"
                class="form-control @error('phone') is-invalid @enderror"
-               value="{{ old('phone', $client->phone ?? '') }}"
+               value="{{ old('phone', $client?->phone ?? '') }}"
                placeholder="+254 7XX XXX XXX">
         @error('phone')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -56,7 +57,7 @@
                   name="address"
                   class="form-control @error('address') is-invalid @enderror"
                   rows="3"
-                  placeholder="Street, City, Country">{{ old('address', $client->address ?? '') }}</textarea>
+                  placeholder="Street, City, Country">{{ old('address', $client?->address ?? '') }}</textarea>
         @error('address')
         <div class="invalid-feedback">{{ $message }}</div>
         @enderror

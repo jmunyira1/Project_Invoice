@@ -17,11 +17,14 @@ class StorePaymentRequest extends FormRequest
         return [
             'project_id' => ['required', 'integer', 'exists:projects,id'],
             'document_id' => ['nullable', 'integer', 'exists:documents,id'],
+            'installment_id' => ['nullable', 'integer', 'exists:installments,id'],
+            'kind' => ['required', Rule::in(['deposit', 'part_payment', 'balance', 'installment', 'refund'])],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'method' => ['required', Rule::in(['mpesa', 'cash', 'bank', 'cheque', 'card'])],
             'reference' => ['nullable', 'string', 'max:100'],
             'paid_on' => ['required', 'date'],
             'notes' => ['nullable', 'string'],
+            'generate_receipt' => ['nullable', 'boolean'],
         ];
     }
 }

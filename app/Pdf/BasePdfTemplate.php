@@ -58,14 +58,190 @@ abstract class BasePdfTemplate extends TCPDF
         $this->drawPageBorder();
 
         $this->drawHeader();
-        $this->buildAddressBlock();
-        $this->buildDocumentMeta();
-        $this->buildLinesTable();
-        $this->buildTotalsBlock();
+
+        if ($this->document->type === 'receipt') {
+            // Receipts get a dedicated "money changed hands" layout.
+            $this->buildReceiptBody();
+        } else {
+            $this->buildAddressBlock();
+            $this->buildDocumentMeta();
+            $this->buildLinesTable();
+            $this->buildTotalsBlock();
+        }
+
         $this->buildNotesBlock();
         $this->buildContactFooter();
 
         return $this->Output('', 'S');
+    }
+
+    // ── Receipt layout ─────────────────────────────────────────────
+
+    protected function buildReceiptBody(): void
+    {
+        $doc = $this->document;
+        $payment = $doc->payment;
+        $project = $doc->project;
+        $client = $project->client;
+
+        // Settlement reference: the linked invoice if present, else the project.
+        $invoice = $payment?->document;
+        if ($invoice) {
+            $refLabel = 'Invoice ' . $invoice->number;
+            $refTotal = $invoice->total;
+            $refPaid = $invoice->total_paid;
+            $refBalance = $invoice->balance;
+        } else {
+            $refLabel = $project->title;
+            $refTotal = $project->total_value;
+            $refPaid = $project->total_paid;
+            $refBalance = $project->balance;
+        }
+
+        $amountPaid = $payment?->amount ?? $refPaid;
+        $green = '#1E7E34';
+
+        $this->Ln(4);
+
+        // ── Title row: "RECEIPT" + PAID badge ──────────────────────
+        $titleY = $this->GetY();
+        $this->SetFont('helvetica', 'B', 22);
+        $this->SetTextColor(...$this->hexToRgb($this->primaryColor));
+        $this->SetXY($this->marginLeft, $titleY);
+        $this->Cell(0, 10, 'RECEIPT', 0, 0, 'L');
+
+        $badgeW = 34;
+        $badgeH = 11;
+        $badgeX = $this->marginLeft + $this->pageWidth - $badgeW;
+        $this->SetFillColor(...$this->hexToRgb($green));
+        $this->SetDrawColor(...$this->hexToRgb($green));
+        $this->RoundedRect($badgeX, $titleY, $badgeW, $badgeH, 2, '1111', 'F');
+        $this->SetDrawColor(0, 0, 0);
+        $this->SetFont('helvetica', 'B', 13);
+        $this->SetTextColor(255, 255, 255);
+        $this->SetXY($badgeX, $titleY + 0.5);
+        $this->Cell($badgeW, 10, 'PAID', 0, 0, 'C');
+
+        $this->SetY($titleY + 14);
+
+        // ── Meta grid: Receipt No / Date / Received From / For ─────
+        $metaY = $this->GetY();
+        $h = 22;
+        $this->SetFillColor(...$this->hexToRgb($this->lightGray));
+        $this->SetDrawColor(...$this->hexToRgb($this->lightGray));
+        $this->RoundedRect($this->marginLeft, $metaY, $this->pageWidth, $h, $this->radius, '1111', 'F');
+        $this->SetDrawColor(0, 0, 0);
+
+        $col = $this->pageWidth / 2;
+
+        $this->SetXY($this->marginLeft + 3, $metaY + 2.5);
+        $this->SetFont('helvetica', '', 7.5);
+        $this->SetTextColor(...$this->hexToRgb($this->textMuted));
+        $this->Cell($col, 4, 'RECEIPT NO', 0, 0);
+        $this->Cell($col, 4, 'DATE', 0, 1);
+
+        $this->SetX($this->marginLeft + 3);
+        $this->SetFont('helvetica', 'B', 9.5);
+        $this->SetTextColor(...$this->hexToRgb($this->textDark));
+        $this->Cell($col, 5, $doc->number, 0, 0);
+        $this->Cell($col, 5, $doc->issue_date->format('d M Y'), 0, 1);
+
+        $this->Ln(1.5);
+        $this->SetX($this->marginLeft + 3);
+        $this->SetFont('helvetica', '', 7.5);
+        $this->SetTextColor(...$this->hexToRgb($this->textMuted));
+        $this->Cell($col, 4, 'RECEIVED FROM', 0, 0);
+        $this->Cell($col, 4, 'FOR', 0, 1);
+
+        $this->SetX($this->marginLeft + 3);
+        $this->SetFont('helvetica', 'B', 9.5);
+        $this->SetTextColor(...$this->hexToRgb($this->textDark));
+        $this->Cell($col, 5, $client->name, 0, 0);
+        $this->Cell($col, 5, $project->title, 0, 1);
+
+        $this->SetY($metaY + $h + 4);
+
+        // ── Amount paid highlight box ──────────────────────────────
+        $amtY = $this->GetY();
+        $amtH = 16;
+        $this->SetFillColor(...$this->hexToRgb($green));
+        $this->SetDrawColor(...$this->hexToRgb($green));
+        $this->RoundedRect($this->marginLeft, $amtY, $this->pageWidth, $amtH, $this->radius, '1111', 'F');
+        $this->SetDrawColor(0, 0, 0);
+
+        $this->SetXY($this->marginLeft + 4, $amtY + 3);
+        $this->SetFont('helvetica', '', 9);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell($this->pageWidth / 2, 10, 'Amount Received', 0, 0, 'L');
+        $this->SetFont('helvetica', 'B', 16);
+        $this->SetXY($this->marginLeft, $amtY + 2);
+        $this->Cell($this->pageWidth - 4, 12, $this->money($amountPaid), 0, 0, 'R');
+
+        $this->SetY($amtY + $amtH + 5);
+
+        // ── Payment details table ──────────────────────────────────
+        if ($payment) {
+            $rows = [
+                ['Payment Method', $payment->method_label],
+                ['Payment Type', $payment->kind_label],
+                ['Reference', $payment->reference ?: '—'],
+                ['Paid On', $payment->paid_on->format('d M Y')],
+                ['Applied To', $refLabel],
+            ];
+
+            $labelW = 50;
+            $this->SetFont('helvetica', '', 9);
+            foreach ($rows as $i => [$label, $value]) {
+                $fill = $i % 2 === 0;
+                if ($fill) {
+                    $this->SetFillColor(...$this->hexToRgb($this->lightGray));
+                }
+                $this->SetX($this->marginLeft);
+                $this->SetTextColor(...$this->hexToRgb($this->textMuted));
+                $this->Cell($labelW, 7, '  ' . $label, 0, 0, 'L', $fill);
+                $this->SetTextColor(...$this->hexToRgb($this->textDark));
+                $this->SetFont('helvetica', 'B', 9);
+                $this->Cell($this->pageWidth - $labelW, 7, $value . '  ', 0, 1, 'R', $fill);
+                $this->SetFont('helvetica', '', 9);
+            }
+            $this->Ln(5);
+        }
+
+        // ── Settlement summary against the invoice/project ─────────
+        $labelW = 50;
+        $valueW = 45;
+        $startX = $this->marginLeft + $this->pageWidth - $labelW - $valueW;
+        $blockW = $labelW + $valueW;
+
+        $sumY = $this->GetY();
+        $this->SetFillColor(...$this->hexToRgb($this->lightGray));
+        $this->SetDrawColor(...$this->hexToRgb($this->lightGray));
+        $this->RoundedRect($startX, $sumY, $blockW, 18, $this->radius, '1111', 'F');
+        $this->SetDrawColor(0, 0, 0);
+
+        $this->SetFont('helvetica', '', 9);
+        $this->SetTextColor(...$this->hexToRgb($this->textMuted));
+        $this->SetXY($startX, $sumY + 2);
+        $this->Cell($labelW, 6, ($invoice ? 'Invoice Total:' : 'Project Total:'), 0, 0, 'R');
+        $this->Cell($valueW, 6, $this->money($refTotal), 0, 1, 'R');
+        $this->SetX($startX);
+        $this->Cell($labelW, 6, 'Total Paid To Date:', 0, 0, 'R');
+        $this->Cell($valueW, 6, $this->money($refPaid), 0, 1, 'R');
+
+        // Balance remaining — highlighted row
+        $balY = $this->GetY();
+        $balColor = $refBalance <= 0 ? $green : $this->primaryColor;
+        $this->SetFillColor(...$this->hexToRgb($balColor));
+        $this->SetDrawColor(...$this->hexToRgb($balColor));
+        $this->RoundedRect($startX, $balY, $blockW, 8, $this->radius, '1111', 'F');
+        $this->SetDrawColor(0, 0, 0);
+        $this->SetFont('helvetica', 'B', 9.5);
+        $this->SetTextColor(255, 255, 255);
+        $this->SetXY($startX, $balY);
+        $this->Cell($labelW, 8, 'Balance Remaining:', 0, 0, 'R');
+        $this->Cell($valueW, 8, $this->money(max(0, $refBalance)), 0, 1, 'R');
+
+        $this->Ln(6);
     }
 
     // ── Page border ────────────────────────────────────────────────
@@ -356,7 +532,7 @@ abstract class BasePdfTemplate extends TCPDF
         $this->Cell(0, 4, 'This is a computer-generated document. No signature is required.', 0, 1, 'C');
     }
 
-    protected function hLine(float $y = null, string $color = null): void
+    protected function hLine(?float $y = null, ?string $color = null): void
     {
         $y = $y ?? $this->GetY();
         $color = $color ?? $this->borderGray;

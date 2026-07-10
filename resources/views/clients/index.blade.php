@@ -9,9 +9,10 @@
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between pb-0">
                     <h5>All Clients</h5>
-                    <a href="{{ route('clients.create') }}" class="btn btn-primary btn-sm">
-                        <i data-feather="plus" style="width:14px;height:14px" class="me-1"></i>
-                        Add Client
+                    <a href="{{ route('clients.create') }}"
+                       hx-get="{{ route('clients.create') }}" hx-target="#app-modal-content"
+                       class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i>Add Client
                     </a>
                 </div>
 
@@ -21,7 +22,9 @@
                             <i data-feather="users" style="width:40px;height:40px;opacity:.3"
                                class="mb-3 d-block mx-auto"></i>
                             <p class="mb-2">No clients yet.</p>
-                            <a href="{{ route('clients.create') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('clients.create') }}"
+                               hx-get="{{ route('clients.create') }}" hx-target="#app-modal-content"
+                               class="btn btn-primary btn-sm">
                                 Add your first client
                             </a>
                         </div>
@@ -82,9 +85,10 @@
                                                 <i data-feather="eye" style="width:13px;height:13px"></i>
                                             </a>
                                             <a href="{{ route('clients.edit', $client) }}"
+                                               hx-get="{{ route('clients.edit', $client) }}" hx-target="#app-modal-content"
                                                class="btn btn-light btn-sm me-1"
                                                title="Edit">
-                                                <i data-feather="edit-2" style="width:13px;height:13px"></i>
+                                                <i class="bi bi-pencil"></i>
                                             </a>
                                             <form method="POST"
                                                   action="{{ route('clients.destroy', $client) }}"
