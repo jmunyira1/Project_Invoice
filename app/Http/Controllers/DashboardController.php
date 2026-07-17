@@ -26,7 +26,7 @@ class DashboardController extends Controller
             ->whereIn('d.type', ['invoice', 'quote'])
             ->whereNull('d.sent_at', 'and', false) // sent docs only
             ->join(
-                DB::raw('(SELECT document_id, SUM(total_price) as total FROM document_lines GROUP BY document_id) as dl'),
+                DB::raw('(SELECT document_id, SUM(total_price * (1 + tax_rate / 100.0)) as total FROM document_lines GROUP BY document_id) as dl'),
                 'dl.document_id', '=', 'd.id'
             )
             ->leftJoin(
@@ -86,7 +86,7 @@ class DashboardController extends Controller
             ->join('projects as pr', 'pr.id', '=', 'd.project_id')
             ->join('clients as c', 'c.id', '=', 'pr.client_id')
             ->join(
-                DB::raw('(SELECT document_id, SUM(total_price) as total FROM document_lines GROUP BY document_id) as dl'),
+                DB::raw('(SELECT document_id, SUM(total_price * (1 + tax_rate / 100.0)) as total FROM document_lines GROUP BY document_id) as dl'),
                 'dl.document_id', '=', 'd.id'
             )
             ->leftJoin(
@@ -94,7 +94,7 @@ class DashboardController extends Controller
                 'p2.document_id', '=', 'd.id'
             )
             ->selectRaw('d.id, d.number, d.issue_date, d.due_date, c.name as client_name, pr.title as project_title, dl.total, COALESCE(p2.paid, 0) as paid, (dl.total - COALESCE(p2.paid, 0)) as balance')
-            ->havingRaw('balance > 0')
+            ->whereRaw('(dl.total - COALESCE(p2.paid, 0)) > 0') // portable: HAVING-without-GROUP BY fails on SQLite
             ->orderBy('d.due_date')
             ->take(8)
             ->get();

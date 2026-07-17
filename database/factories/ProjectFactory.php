@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Client;
+use App\Models\Organisation;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -10,15 +12,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProjectFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'organisation_id' => Organisation::factory(),
+            'client_id' => Client::factory(),
+            'title' => fake()->catchPhrase(),
+            'description' => null,
+            'value' => null,
+            'status' => 'active',
+            'due_date' => now()->addDays(30),
         ];
     }
 }

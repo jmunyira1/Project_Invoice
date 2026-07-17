@@ -62,9 +62,63 @@ class Document extends Model
         return $this->belongsTo(Payment::class);
     }
 
+    /**
+     * Net total before tax.
+     */
+    public function getSubtotalAttribute(): float
+    {
+        return round($this->lines->sum('total_price'), 2);
+    }
+
+    /**
+     * Total VAT across all lines.
+     */
+    public function getTaxTotalAttribute(): float
+    {
+        return round($this->lines->sum(fn ($l) => $l->tax_amount), 2);
+    }
+
+    /**
+     * Grand total the client owes (net + VAT).
+     */
     public function getTotalAttribute(): float
     {
-        return $this->lines->sum('total_price');
+        return round($this->subtotal + $this->tax_total, 2);
+    }
+
+    /**
+     * VAT grouped by rate, e.g. [16.0 => ['net' => 3500, 'tax' => 560]].
+     * Only rates greater than zero are included.
+     */
+    public function getTaxBreakdownAttribute(): array
+    {
+        $groups = [];
+        foreach ($this->lines as $line) {
+            if ($line->tax_rate <= 0) {
+                continue;
+            }
+            $rate = (float) $line->tax_rate;
+            $groups[(string) $rate] ??= ['rate' => $rate, 'net' => 0.0, 'tax' => 0.0];
+            $groups[(string) $rate]['net'] += $line->total_price;
+            $groups[(string) $rate]['tax'] += $line->tax_amount;
+        }
+        return array_values($groups);
+    }
+
+    /**
+     * Whether VAT actually applies to this document.
+     */
+    public function getHasTaxAttribute(): bool
+    {
+        return $this->tax_total > 0;
+    }
+
+    /**
+     * A VAT invoice is titled "Tax Invoice" in Kenya.
+     */
+    public function getIsTaxInvoiceAttribute(): bool
+    {
+        return $this->type === 'invoice' && $this->has_tax;
     }
 
     // ── Computed ───────────────────────────────────────────────────
@@ -101,6 +155,14 @@ class Document extends Model
             'statement' => 'Statement',
             default => ucfirst($this->type),
         };
+    }
+
+    /**
+     * The heading shown on the document — a VAT invoice reads "Tax Invoice".
+     */
+    public function getDocumentTitleAttribute(): string
+    {
+        return $this->is_tax_invoice ? 'Tax Invoice' : $this->type_label;
     }
 
     public function getStatusBadgeAttribute(): string

@@ -171,6 +171,47 @@
                                     <div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
 
+                                {{-- ── Tax / VAT ─────────────────────────────── --}}
+                                <div class="col-12">
+                                    <hr class="my-1">
+                                    <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Tax &amp; VAT</h6>
+                                    <small class="text-muted">Kenya: KRA PIN and 16% VAT on tax invoices.</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">KRA PIN</label>
+                                    <input type="text"
+                                           name="kra_pin"
+                                           class="form-control text-uppercase @error('kra_pin') is-invalid @enderror"
+                                           value="{{ old('kra_pin', $org->kra_pin) }}"
+                                           placeholder="e.g. P051234567X">
+                                    @error('kra_pin')
+                                    <div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    <small class="text-muted">Shown on every document.</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Default VAT Rate (%)</label>
+                                    <input type="number" step="0.01" min="0" max="100"
+                                           name="default_tax_rate"
+                                           class="form-control @error('default_tax_rate') is-invalid @enderror"
+                                           value="{{ old('default_tax_rate', $org->default_tax_rate) }}">
+                                    @error('default_tax_rate')
+                                    <div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    <small class="text-muted">Kenya standard rate is 16%.</small>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="vat_registered" name="vat_registered" value="1"
+                                               {{ old('vat_registered', $org->vat_registered) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="vat_registered">
+                                            We are VAT registered — charge VAT and label invoices as “Tax Invoice”
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary">
                                         Save Organisation Details

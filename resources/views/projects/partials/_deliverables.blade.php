@@ -13,7 +13,7 @@
               hx-target="#project-body" hx-swap="outerHTML">
             @csrf
             <div class="row g-2 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label small">Name *</label>
                     <input type="text" name="name" class="form-control form-control-sm" placeholder="e.g. Logo design" required>
                 </div>
@@ -28,6 +28,10 @@
                 <div class="col-md-2">
                     <label class="form-label small">Unit Price *</label>
                     <input type="number" name="unit_price" class="form-control form-control-sm" value="0" min="0" step="0.01" required>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label small" title="Leave blank to use the org default VAT rate">Tax %</label>
+                    <input type="number" name="tax_rate" class="form-control form-control-sm" min="0" max="100" step="0.01" placeholder="def">
                 </div>
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-success btn-sm w-100">Save</button>
@@ -84,7 +88,7 @@
                                       hx-target="#project-body" hx-swap="outerHTML">
                                     @csrf @method('PATCH')
                                     <div class="row g-2 align-items-end">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <input type="text" name="name" class="form-control form-control-sm" value="{{ $d->name }}" required>
                                         </div>
                                         <div class="col-md-3">
@@ -95,6 +99,9 @@
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" name="unit_price" class="form-control form-control-sm" value="{{ $d->unit_price }}" min="0" step="0.01" required>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <input type="number" name="tax_rate" class="form-control form-control-sm" value="{{ $d->tax_rate }}" min="0" max="100" step="0.01" placeholder="def" title="Tax %; blank = org default">
                                         </div>
                                         <div class="col-md-1">
                                             <button type="submit" class="btn btn-success btn-sm w-100">Save</button>

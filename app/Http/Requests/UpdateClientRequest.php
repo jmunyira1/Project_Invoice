@@ -20,6 +20,7 @@ class UpdateClientRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'kra_pin' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:1000'],
         ];
     }

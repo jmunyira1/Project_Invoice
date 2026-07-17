@@ -2,44 +2,50 @@
 
 namespace Database\Seeders;
 
+use App\Models\Organisation;
 use App\Models\Template;
 use Illuminate\Database\Seeder;
 
 class TemplateSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database seeds. There are exactly three document templates,
+     * each backed by a PDF class in app/Pdf.
      */
     public function run(): void
     {
         $templates = [
             [
-                'name' => 'Template 001',
+                'name' => 'Classic',
                 'slug' => 'template-001',
-                'description' => 'Classic dark header bar with accent underline. Clean and professional.',
+                'description' => 'Left-aligned masthead — brand on the left, title on the right, with a Bill-To column beside the invoice details. Clean and monochrome.',
             ],
             [
-                'name' => 'Template 002',
+                'name' => 'Centered',
                 'slug' => 'template-002',
-                'description' => 'Modern design with bold left accent strip and purple branding.',
+                'description' => 'Centered title with side-by-side From / Bill-To blocks. Minimal, understated and monochrome.',
             ],
             [
-                'name' => 'Template 003',
+                'name' => 'Accent',
                 'slug' => 'template-003',
-                'description' => 'Minimal whitespace layout. Clean typography, no colour blocks.',
-            ],
-            [
-                'name' => 'Template 004',
-                'slug' => 'template-004',
-                'description' => 'Bold two-tone split header. Blue and amber contrast.',
+                'description' => 'A coloured header band with a reversed white title and an accent-coloured total. A bolder, more branded look.',
             ],
         ];
 
         foreach ($templates as $data) {
-            Template::updateOrCreate(
-                ['slug' => $data['slug']],
-                $data
-            );
+            Template::updateOrCreate(['slug' => $data['slug']], $data);
+        }
+
+        // Retire the legacy fourth template (never had a PDF class).
+        $legacy = Template::where('slug', 'template-004')->first();
+        if ($legacy) {
+            $fallback = Template::where('slug', 'template-001')->value('id');
+            Organisation::where('default_template_id', $legacy->id)
+                ->update(['default_template_id' => $fallback]);
+
+            if (!$legacy->documents()->exists()) {
+                $legacy->delete();
+            }
         }
     }
 }

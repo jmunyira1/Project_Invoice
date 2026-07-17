@@ -19,10 +19,33 @@ class Organisation extends Model
         'email',
         'phone',
         'address',
+        'kra_pin',
+        'vat_registered',
+        'default_tax_rate',
         'logo_path',
         'currency',
         'default_template_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'vat_registered' => 'boolean',
+            'default_tax_rate' => 'float',
+        ];
+    }
+
+    /**
+     * The tax rate to apply to a new line, resolving a per-item override
+     * against the org default. Returns 0 when the org is not VAT registered.
+     */
+    public function effectiveTaxRate(?float $itemRate = null): float
+    {
+        if (!$this->vat_registered) {
+            return 0.0;
+        }
+        return $itemRate ?? (float) $this->default_tax_rate;
+    }
 
     // ── Relationships ──────────────────────────────────────────────
 

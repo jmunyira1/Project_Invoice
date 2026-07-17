@@ -35,7 +35,13 @@ class SettingController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:1000'],
             'currency' => ['required', Rule::in(['KES', 'USD', 'GBP', 'EUR', 'ZAR', 'UGX', 'TZS'])],
+            'kra_pin' => ['nullable', 'string', 'max:20'],
+            'vat_registered' => ['nullable', 'boolean'],
+            'default_tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
+
+        $data['vat_registered'] = $request->boolean('vat_registered');
+        $data['default_tax_rate'] = $data['default_tax_rate'] ?? 16;
 
         $this->org()->update($data);
 

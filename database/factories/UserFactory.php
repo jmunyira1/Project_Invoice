@@ -25,12 +25,23 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'organisation_id' => \App\Models\Organisation::factory(),
+            'role' => 'owner',
+            'is_super_admin' => false,
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * A non-owner team member.
+     */
+    public function member(): static
+    {
+        return $this->state(fn () => ['role' => 'member']);
     }
 
     /**

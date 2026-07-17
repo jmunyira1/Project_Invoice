@@ -70,13 +70,21 @@
         <div class="card-body py-3">
             <div class="d-flex justify-content-between small mb-1">
                 <span class="text-muted">Collected {{ $currency }} {{ number_format($project->total_paid, 2) }}
-                    of {{ $currency }} {{ number_format($project->total_value, 2) }}</span>
+                    of {{ $currency }} {{ number_format($project->gross_value, 2) }}
+                    @if($project->tax_total > 0)<span class="text-muted">(incl. VAT)</span>@endif</span>
                 <span class="fw-semibold">{{ $project->paid_percent }}%</span>
             </div>
             <div class="progress" style="height:8px">
                 <div class="progress-bar bg-success" role="progressbar"
                      style="width: {{ $project->paid_percent }}%"></div>
             </div>
+            @if($project->tax_total > 0)
+                <div class="d-flex justify-content-between small text-muted mt-2">
+                    <span>Net {{ $currency }} {{ number_format($project->total_value, 2) }}
+                        · VAT {{ $currency }} {{ number_format($project->tax_total, 2) }}</span>
+                    <span>Balance {{ $currency }} {{ number_format($project->balance, 2) }}</span>
+                </div>
+            @endif
         </div>
     </div>
 

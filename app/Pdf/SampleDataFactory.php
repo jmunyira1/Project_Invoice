@@ -20,13 +20,16 @@ class SampleDataFactory
     {
         $sample = new Organisation();
         $sample->forceFill([
-            'id'          => $real->id,
-            'name'        => $real->name,
-            'email'       => $real->email,
-            'phone'       => $real->phone ?? '+254 700 000 000',
-            'address'     => $real->address ?? "123 Business Park\nNairobi, Kenya",
-            'currency'    => $real->currency,
-            'logo_path'   => $real->logo_path,
+            'id'             => $real->id,
+            'name'           => $real->name,
+            'email'          => $real->email,
+            'phone'          => $real->phone ?? '+254 700 000 000',
+            'address'        => $real->address ?? "123 Business Park\nNairobi, Kenya",
+            'currency'       => $real->currency,
+            'logo_path'      => $real->logo_path,
+            'kra_pin'        => $real->kra_pin ?? 'P051234567X',
+            'vat_registered' => $real->vat_registered ?? true,
+            'default_tax_rate' => $real->default_tax_rate ?? 16,
         ]);
 
         return $sample;
@@ -44,6 +47,7 @@ class SampleDataFactory
             'email'   => 'billing@acme.com',
             'phone'   => '+254 722 123 456',
             'address' => "456 Client Avenue\nMombasa, Kenya",
+            'kra_pin' => 'P052416465L',
         ]);
 
         // Fake project
@@ -84,7 +88,7 @@ class SampleDataFactory
         return $document;
     }
 
-    private static function makeLine(string $name, string $desc, float $qty, float $price): DocumentLine
+    private static function makeLine(string $name, string $desc, float $qty, float $price, float $taxRate = 16): DocumentLine
     {
         $line = new DocumentLine();
         $line->forceFill([
@@ -93,6 +97,7 @@ class SampleDataFactory
             'quantity'    => $qty,
             'unit_price'  => $price,
             'total_price' => $qty * $price,
+            'tax_rate'    => $taxRate,
             'sort_order'  => 0,
         ]);
         return $line;

@@ -49,6 +49,7 @@ class DeliverableController extends Controller
             'description' => ['nullable', 'string'],
             'quantity' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'numeric', 'min:0'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
     }
 }

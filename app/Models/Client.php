@@ -18,6 +18,7 @@ class Client extends Model
         'name',
         'email',
         'phone',
+        'kra_pin',
         'address',
     ];
 

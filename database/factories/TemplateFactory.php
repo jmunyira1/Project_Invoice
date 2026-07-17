@@ -10,15 +10,12 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TemplateFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'name' => 'Classic',
+            'slug' => 'template-001', // backed by App\Pdf\Template001
+            'description' => 'Left-aligned masthead. Clean and monochrome.',
         ];
     }
 }

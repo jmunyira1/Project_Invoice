@@ -113,11 +113,41 @@ class Project extends Model
     }
 
     /**
-     * Outstanding balance = value - paid.
+     * VAT the client is charged across the project (0 when not VAT registered).
+     * Mirrors how invoices compute tax so on-screen figures reconcile with the
+     * documents the client actually receives.
+     */
+    public function getTaxTotalAttribute(): float
+    {
+        $org = $this->organisation;
+        if (!$org || !$org->vat_registered) {
+            return 0.0;
+        }
+
+        if ($this->value !== null) {
+            return round($this->value * ((float) $org->default_tax_rate / 100), 2);
+        }
+
+        return round($this->deliverables->sum(function ($d) use ($org) {
+            $net = $d->quantity * $d->unit_price;
+            return $net * ($org->effectiveTaxRate($d->tax_rate) / 100);
+        }), 2);
+    }
+
+    /**
+     * Total the client owes, including VAT.
+     */
+    public function getGrossValueAttribute(): float
+    {
+        return round($this->total_value + $this->tax_total, 2);
+    }
+
+    /**
+     * Outstanding balance = gross value (incl. VAT) - paid.
      */
     public function getBalanceAttribute(): float
     {
-        return $this->total_value - $this->total_paid;
+        return round($this->gross_value - $this->total_paid, 2);
     }
 
     /**
@@ -133,10 +163,10 @@ class Project extends Model
      */
     public function getPaidPercentAttribute(): float
     {
-        if ($this->total_value <= 0) {
+        if ($this->gross_value <= 0) {
             return 0.0;
         }
-        return min(100, round(($this->total_paid / $this->total_value) * 100, 1));
+        return min(100, round(($this->total_paid / $this->gross_value) * 100, 1));
     }
 
     /**

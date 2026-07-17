@@ -18,6 +18,7 @@ class Deliverable extends Model
         'description',
         'quantity',
         'unit_price',
+        'tax_rate',
     ];
 
     public function project(): BelongsTo
@@ -38,6 +39,7 @@ class Deliverable extends Model
         return [
             'quantity' => 'float',
             'unit_price' => 'float',
+            'tax_rate' => 'float',
         ];
     }
 }

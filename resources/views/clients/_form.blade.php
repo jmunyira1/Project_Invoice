@@ -50,6 +50,24 @@
         @enderror
     </div>
 
+    {{-- KRA PIN --}}
+    <div class="col-md-6">
+        <label class="form-label" for="kra_pin">
+            KRA PIN
+            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip"
+               title="Buyer's KRA PIN — required on tax invoices for VAT-registered clients."></i>
+        </label>
+        <input type="text"
+               id="kra_pin"
+               name="kra_pin"
+               class="form-control text-uppercase @error('kra_pin') is-invalid @enderror"
+               value="{{ old('kra_pin', $client?->kra_pin ?? '') }}"
+               placeholder="e.g. P051234567X">
+        @error('kra_pin')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
     {{-- Address --}}
     <div class="col-12">
         <label class="form-label" for="address">Address</label>

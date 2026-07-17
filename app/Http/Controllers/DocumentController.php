@@ -76,6 +76,7 @@ class DocumentController extends Controller
     private function snapshotDeliverables(Document $document, Project $project): void
     {
         $project->load('deliverables');
+        $org = $this->org();
 
         foreach ($project->deliverables as $i => $d) {
             DocumentLine::create([
@@ -85,6 +86,7 @@ class DocumentController extends Controller
                 'quantity' => $d->quantity,
                 'unit_price' => $d->unit_price,
                 'total_price' => $d->quantity * $d->unit_price,
+                'tax_rate' => $org->effectiveTaxRate($d->tax_rate),
                 'sort_order' => $i,
             ]);
         }
