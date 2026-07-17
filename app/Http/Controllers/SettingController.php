@@ -38,9 +38,11 @@ class SettingController extends Controller
             'kra_pin' => ['nullable', 'string', 'max:20'],
             'vat_registered' => ['nullable', 'boolean'],
             'default_tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'etims_enabled' => ['nullable', 'boolean'],
         ]);
 
         $data['vat_registered'] = $request->boolean('vat_registered');
+        $data['etims_enabled'] = $request->boolean('etims_enabled');
         $data['default_tax_rate'] = $data['default_tax_rate'] ?? 16;
 
         $this->org()->update($data);

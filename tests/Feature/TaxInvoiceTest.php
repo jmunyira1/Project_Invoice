@@ -26,7 +26,7 @@ class TaxInvoiceTest extends TestCase
 
     public function test_document_totals_include_vat(): void
     {
-        $org = $this->makeOrganisation(['vat_registered' => true]);
+        $org = $this->makeOrganisation(['vat_registered' => true, 'etims_enabled' => true]);
         $project = $this->makeProject($org);
 
         $doc = Document::create([
@@ -73,6 +73,36 @@ class TaxInvoiceTest extends TestCase
         $doc = Document::latest('id')->first();
         $this->assertEquals(16.0, $doc->lines->first()->tax_rate);
         $this->assertEquals(116000, $doc->total); // 100000 + 16%
+    }
+
+    public function test_tax_invoice_title_is_gated_on_etims(): void
+    {
+        // VAT is charged, but without eTIMS we must not claim "Tax Invoice".
+        $org = $this->makeOrganisation(['vat_registered' => true, 'etims_enabled' => false]);
+        $project = $this->makeProject($org);
+
+        $doc = Document::create([
+            'organisation_id' => $org->id,
+            'project_id' => $project->id,
+            'template_id' => $org->default_template_id,
+            'type' => 'invoice',
+            'number' => 'INV-TEST-2',
+            'issue_date' => now(),
+        ]);
+        DocumentLine::create([
+            'document_id' => $doc->id, 'name' => 'Design', 'quantity' => 1,
+            'unit_price' => 100000, 'total_price' => 100000, 'tax_rate' => 16,
+        ]);
+        $doc->load('lines');
+
+        $this->assertEquals(16000, $doc->tax_total);   // VAT still charged…
+        $this->assertEquals(116000, $doc->total);
+        $this->assertFalse($doc->is_tax_invoice);      // …but not labelled a Tax Invoice
+        $this->assertSame('Invoice', $doc->document_title);
+
+        // Once eTIMS is switched on, the legal title applies.
+        $org->update(['etims_enabled' => true]);
+        $this->assertSame('Tax Invoice', $doc->fresh()->load('lines')->document_title);
     }
 
     public function test_non_vat_organisation_produces_no_tax(): void

@@ -22,6 +22,7 @@ class Organisation extends Model
         'kra_pin',
         'vat_registered',
         'default_tax_rate',
+        'etims_enabled',
         'logo_path',
         'currency',
         'default_template_id',
@@ -32,6 +33,7 @@ class Organisation extends Model
         return [
             'vat_registered' => 'boolean',
             'default_tax_rate' => 'float',
+            'etims_enabled' => 'boolean',
         ];
     }
 

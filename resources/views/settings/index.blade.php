@@ -207,8 +207,26 @@
                                                id="vat_registered" name="vat_registered" value="1"
                                                {{ old('vat_registered', $org->vat_registered) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="vat_registered">
-                                            We are VAT registered — charge VAT and label invoices as “Tax Invoice”
+                                            We are VAT registered — charge VAT on documents
                                         </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="etims_enabled" name="etims_enabled" value="1"
+                                               {{ old('etims_enabled', $org->etims_enabled) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="etims_enabled">
+                                            Invoices are KRA eTIMS validated — label them “Tax Invoice”
+                                        </label>
+                                    </div>
+                                    <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        Leave this <strong>off</strong> until your invoices actually go through KRA eTIMS.
+                                        Without eTIMS control-unit details (CU invoice no. &amp; QR), a self-printed
+                                        “Tax Invoice” isn’t valid for your client to claim input VAT. VAT is still
+                                        calculated and shown either way — this only controls the document title.
                                     </div>
                                 </div>
 

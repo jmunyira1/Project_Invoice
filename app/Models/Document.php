@@ -114,11 +114,18 @@ class Document extends Model
     }
 
     /**
-     * A VAT invoice is titled "Tax Invoice" in Kenya.
+     * May this document legally be titled "Tax Invoice"?
+     *
+     * In Kenya that requires KRA eTIMS validation (control-unit number, serial
+     * and QR). Without it a self-printed "Tax Invoice" isn't valid for the
+     * buyer to claim input VAT, so we only use the title once eTIMS is on.
+     * VAT is still charged and shown regardless — only the label is gated.
      */
     public function getIsTaxInvoiceAttribute(): bool
     {
-        return $this->type === 'invoice' && $this->has_tax;
+        return $this->type === 'invoice'
+            && $this->has_tax
+            && (bool) $this->organisation?->etims_enabled;
     }
 
     // ── Computed ───────────────────────────────────────────────────
